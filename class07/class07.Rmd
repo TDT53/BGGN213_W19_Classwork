@@ -2,7 +2,7 @@
 title: "class07"
 author: "Tuan"
 date: "1/30/2019"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -22,9 +22,6 @@ Test this function
 rescale(1:5)
 ```
 
-```{r}
-rescale(c(1:5, "string"))
-```
 
 We want to make this function more robust to these types of errors
 ```{r}
