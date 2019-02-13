@@ -1,0 +1,99 @@
+---
+title: "class07"
+author: "Tuan"
+date: "1/30/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Function revisited
+
+Load (i.e. **source**) our rescale() function from the last class
+```{r}
+source("http://tinyurl.com/rescale-R")
+```
+
+Test this function
+
+```{r}
+rescale(1:5)
+```
+
+```{r}
+rescale(c(1:5, "string"))
+```
+
+We want to make this function more robust to these types of errors
+```{r}
+rescale2(c(1:5, "string"))
+```
+
+```{r}
+is.numeric(1:5)
+```
+
+```{r}
+is.numeric("string")
+```
+
+```{r}
+is.numeric(c(1:5, "string"))
+```
+
+```{r}
+# let define an example x and y
+x <- c(1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3, 4)
+
+is.na(x)
+is.na(y)
+sum(is.na(x) & is.na(y))
+which(is.na(x) & is.na(y))
+```
+
+Now take the above working snippet and make a first function
+```{r}
+both_na <- function(x,y) {
+  # Check for NA elements in both input vectors
+  sum(is.na(x) & is.na(y))
+}
+```
+
+```{r}
+both_na(x,y)
+```
+
+```{r}
+x <-  c(NA, NA, NA)
+y1 <- c( 1, NA, NA)
+y2 <- c( 1, NA, NA, NA)
+y3 <- c( 1, NA, NA, NA, NA)
+```
+
+
+```{r}
+# What will this return?
+both_na(x, y2)
+```
+
+
+```{r}
+# What will this return?
+both_na(x, y3)
+```
+
+```{r}
+# What will this return?
+both_na(y1, y3)
+```
+
+
+
+
+
+
+
+

@@ -1,0 +1,39 @@
+---
+title: "Homework Lecture 06"
+author: "Tuan"
+date: "1/31/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Bfac** function description:
+
+1) The input to the the function **Bfac** is a string representing the PDB identifier of protein of interest.
+2) The function **Bfac** does the following:
+    - Create a PDB object from the PDB file corresponding to the PDB idertifier input by user,  through the **read.pdb()** function.
+    - Trim down the original PDB object to a smaller object (*e.g.* only looking at peptide backbone or nucleic acid residues, etc.). This is carried out by the **trim.pdb()**.
+    - Plot the B-factor values of all the atoms from the bear-down PDB object from the obove step.
+3) The output is a line plot of B-factor values for the polypeptide backbone of interest, with annotation of secondary structure at the top and bottom margins of the plot (grey for beta sheets and black for helices). The plot gives a hint to ordered and flexible regions of the protein, and can be used to compare protein structures and infer conformational changes of a protein of interest under different conditions.
+
+
+```{r}
+Bfac <- function(x) {
+  library(bio3d) 
+    prot <- read.pdb(x)
+    prot.chainA <- trim.pdb(prot, chain = "A", elety = "CA")
+    plotb3(prot.chainA$atom$b, sse = prot.chainA, type = "l", ylab = "B-factor")
+}
+```
+
+
+The following is an example of **Bfac** function for *E. coli*(K12) adenylate kinase bound to Ap5A inhibitor and unbound state, respectively.
+
+
+```{r}
+Bfac("4AKE")
+Bfac("1AKE")
+```
+

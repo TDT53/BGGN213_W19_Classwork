@@ -1,0 +1,136 @@
+---
+title: "Class 6 R Functions"
+author: "Tuan"
+date: "1/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## File reading (again!)
+
+Here we try to use **read.table()** and friends to unput some example data into R
+
+Click the insert button to insert a code chunk.
+```{r}
+read.table("https://bioboot.github.io/bggn213_S18/class-material/test1.txt", header = T, sep = ",")
+```
+```{r}
+file1 <- "https://bioboot.github.io/bggn213_S18/class-material/test1.txt"
+read.csv(file1)
+```
+
+```{r}
+file2 <- "https://bioboot.github.io/bggn213_S18/class-material/test2.txt"
+read.table(file2, header = T, sep = "$")
+```
+
+```{r}
+file3 <- "https://bioboot.github.io/bggn213_S18/class-material/test3.txt"
+read.table(file3)
+```
+
+```{r}
+add <- function(x, y=1) {
+# Sum the input x and y 
+  x+y
+}
+
+# add(1,2,3). Return error due to unsued argument (the third one)
+
+# add(x=1, y="b"). Return error due to different types of data
+```
+
+```{r}
+rescale <- function(x) {
+   rng <-range(x)
+   (x - rng[1]) / (rng[2] - rng[1])
+}
+```
+
+```{r}
+rescale(1:10)
+```
+
+```{r}
+# How would you get your function to work here...
+rescale( c(1,2,NA,3,10) )
+
+```
+
+```{r}
+rescale2 <- function(x) {
+   rng <-range(x, na.rm = T)
+   (x - rng[1]) / (rng[2] - rng[1])
+}
+```
+
+```{r}
+rescale2(c(1,2, NA, 3, 10))
+```
+
+```{r}
+rescale3 <- function(x, na.rm=TRUE, plot=FALSE) {
+   if(na.rm) {
+     rng <-range(x, na.rm=na.rm)
+   } else {
+     rng <-range(x)
+   }
+   print("Hello")
+   answer <- (x - rng[1]) / (rng[2] - rng[1])
+   print("is it me you are looking for?")
+   if(plot) {
+      plot(answer, typ="b", lwd=4)
+     print("please done ever sing again!")
+}
+   print("I can see it in ...")
+}
+```
+
+```{r}
+library(bio3d)
+```
+
+```{r}
+# Can you improve this analysis code?
+library(bio3d)
+s1 <- read.pdb("4AKE")  # kinase with drug
+s2 <- read.pdb("1AKE")  # kinase no drug
+s3 <- read.pdb("1E4Y")  # kinase with drug
+
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s3, chain="A", elety="CA")
+
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+```{r}
+hc <- hclust( dist( rbind(s1.b, s2.b, s3.b) ) )
+plot(hc)
+```
+
+```{r}
+Bfac.trend <- function(x) {
+  library(bio3d) 
+  for (i in x) {
+    prot <- read.pdb(i)
+    prot.chainA <- trim.pdb(prot, chain = "A", elety = "CA")
+    prot.b <- prot.chainA$atom$b
+    plotb3(prot.b, sse = prot.chainA, type = "l", ylab = "Bfactor")
+  }
+}
+```
+
+```{r}
+Bfac.trend(c("4AKE", "1AKE", "1E4Y"))
+```
+
+
