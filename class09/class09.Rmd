@@ -2,7 +2,7 @@
 title: "Lecture 09 PCA and Clustering project"
 author: "Tuan"
 date: "2/8/2019"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
