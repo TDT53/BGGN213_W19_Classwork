@@ -1,0 +1,93 @@
+---
+title: "Lecture 11 Structural Bioinformatics"
+author: "Tuan"
+date: "2/15/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## PDB data
+```{r}
+stats <- read.csv("Data Export Summary.csv", row.names = 1)
+stats
+```
+
+Q: determine the percentage of structures solved by X-Ray and Electron Microscopy.
+
+```{r}
+pre.by.method <- stats$Total/sum(stats$Total)*100
+names(pre.by.method) <- row.names(stats)
+pre.by.method
+```
+
+Q:  what proportion of structures are protein?
+```{r}
+round(sum(stats$Proteins)/sum(stats$Total)*100, 2)
+```
+
+The **datapasta** package helps paste data in various forms as data frame form.
+
+Section 3: Bio3D
+
+```{r}
+library(bio3d)
+```
+
+
+```{r}
+pdb <- read.pdb("1HSG")
+pdb
+```
+
+```{r}
+library("bio3d.view")
+```
+
+```{r}
+view(pdb, "overview", col = "sse")
+```
+
+
+Extract the protein only portion of this PDB structure and write out to a new PDB file.
+
+```{r}
+HIVII.protease <- atom.select(pdb, "calpha")
+HIVII.protease
+```
+```{r}
+pdb$atom[HIVII.protease$atom, ]
+protein.pdb <- trim.pdb(pdb, HIVII.protease)
+protein.pdb
+```
+
+```{r}
+view(protein.pdb)
+```
+
+```{r}
+write.pdb(protein.pdb, file = "HIVIIprotease.protein")
+```
+
+
+Extract the ligand (i.e. drug) and write out to a separate file.
+
+
+```{r}
+drug.pdb <- atom.select(pdb, "ligand")
+ligand.pdb <- trim.pdb(pdb, drug.pdb)
+view(ligand.pdb)
+write.pdb(ligand.pdb, file = "HIVIIProtease.drug")
+```
+
+
+```{r}
+modes <- nma(pdb)
+modes <- nma(pdb)
+m7 <- mktrj(modes, mode = 7, file = "mode_7.pdb")
+view(m7, col = vec2color(rmsf(m7)))
+```
+
+
