@@ -1,0 +1,65 @@
+---
+title: "Lecture 12 Drug Discovery with Structural Bioinformatics"
+author: "Tuan"
+date: "2/20/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Clean up our protein trarget structure
+
+First we download a target (i.e protein receptor) structure from the main PDB database. We will pick PDB ID "1hsg"
+```{r}
+library(bio3d)
+
+pdb.code <- "1hsg"
+file.name <- get.pdb(pdb.code)
+```
+
+Extract the protein only segment of this PDB entry and write out a new PDB format file. We will also do the same thing for the ligand
+```{r}
+hiv <- read.pdb(file.name)
+hiv
+```
+
+protein extraction first
+```{r}
+prot <- trim.pdb(hiv, "protein")
+prot
+```
+
+```{r}
+write.pdb(prot, file = paste(pdb.code, "_protein.pdb", sep = ""))
+```
+
+Do the same thing for the ligand
+```{r}
+ligand <- trim.pdb(hiv, "ligand")
+write.pdb(ligand, file = paste(pdb.code, "_ligand.pdb", sep = ""))
+```
+
+The last 2 columns of .pdbqt file represent electrostatic charges of atoms.
+
+Convert the docking result for viewing in VMD
+```{r}
+res <- read.pdb("all.pdbqt", multi = T)
+res
+```
+
+```{r}
+write.pdb(res, file = "result.pdb")
+```
+
+```{r}
+res <- read.pdb("all.pdbqt", multi=TRUE) 
+ori <- read.pdb("ligand.pdbqt")
+rmsd(ori, res)
+```
+
+```{r}
+rmsd(res)
+```
+
