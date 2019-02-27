@@ -1,0 +1,145 @@
+---
+title: "Lecture 14 RNASeq Analysis - Differential Gene Expression"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data input
+```{r}
+counts <- read.csv("Data/airway_scaledcounts.csv", stringsAsFactors = F)
+metadata <- read.csv("Data/airway_metadata.csv", stringsAsFactors = F)
+```
+
+How many genes are in this dataset?
+```{r}
+nrow(counts)
+```
+
+How many experiments are in this dataset?
+```{r}
+ncol(counts)
+```
+
+Let's check the correspondence of the col in counts and the row in metadata. The function **all()** will summarize all the logical results, return F if there is one F in the result.
+```{r}
+all(metadata$id == colnames(counts)[-1])
+```
+
+Extract the controls and treated in metadata
+```{r}
+control.ids <- metadata$id[metadata[, "dex"] == "control"]
+control <- counts[, control.ids]
+# To put back the gene names into the data
+rownames(control) <- counts$ensgene
+
+# Dimilarly for the treated
+treated.ids <- metadata$id[metadata[, "dex"] == "treated"]
+treated <- counts[, treated.ids]
+rownames(treated) <- counts$ensgene
+
+#Examine the extracted data
+head(control)
+head(treated)
+```
+
+Calculate the mean of each gene across all the controls or all the treated
+```{r}
+control.mean <- rowSums(control)/ncol(control)
+treated.mean <- rowSums(treated)/ncol(treated)
+```
+
+Put the 2 data objects **control.mean** and **treated.mean** into 1 dataframe
+```{r}
+meancounts <- data.frame(control.mean, treated.mean)
+colSums(meancounts)
+```
+
+Making a plot with Control on the x axis and Treated on the y axis
+```{r}
+plot(meancounts$control.mean, meancounts$treated.mean, log = "xy")
+```
+
+Calculate the log2 fold changes between treated and control groups
+```{r}
+meancounts$log2fc <- log2(meancounts[, "treated.mean"]/meancounts[, "control.mean"])
+head(meancounts)
+```
+
+Find all the genes with either control or treated values as 0
+```{r}
+zero.val <- (which(meancounts[,1:2] == 0, arr.ind = T)) # The arr.ind argument gives back the indices (which row and which col) of the genes with either of them being 0. unique() gives nonredundant indices
+to.rm <- unique(zero.val[,1])
+mycounts <- meancounts[-to.rm, ]
+head(mycounts)
+```
+
+Extract all genes with log2fc > 2 (upregulated) of < -2 (downregulated)
+```{r}
+up.ind <- mycounts$log2fc > 2
+down.ind <- mycounts$log2fc < (-2)
+```
+
+```{r}
+head(mycounts[up.ind, ])
+```
+
+Add anotations data from Ensembel annotation file
+```{r}
+anno <-read.csv("Data/annotables_grch38.csv")
+```
+
+Trying the **merge()** function to add the annotation data to out **mycounts** results
+```{r}
+mycounts.anno <- merge (x = mycounts, y = anno, by.x = "row.names", by.y = "ensgene")
+head(mycounts.anno)
+```
+
+```{r, eval = FALSE}
+source("http://bioconductor.org/biocLite.R")
+biocLite("AnnotationDbi")
+biocLite("org.Hs.eg.db")
+```
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+```
+
+Using Bioconductor **AnnotationBdi** package to map the IDs
+```{r}
+mycounts$symbol <- mapIds(org.Hs.eg.db,
+                     keys=row.names(mycounts),
+                     column="SYMBOL",
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+```{r}
+head(mycounts)
+```
+
+```{r}
+library(DESeq2)
+citation("DESeq2")
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex, 
+                              tidy=TRUE)
+dds
+```
+```{r}
+dds <- DESeq(dds)
+res <- results(dds, alpha = 0.05)
+summary(res)
+```
+
+```{r}
+mycols <- rep("gray", nrow(res))
+mycols[abs(res$log2FoldChange) > 2] = "red"
+subset.inds <- res$padj <0.01 & abs(res$log2FoldChange) > 2
+mycols[subset.inds] = "blue"
+plot(res$log2FoldChange, -log(res$padj), col = mycols)
+```
+
