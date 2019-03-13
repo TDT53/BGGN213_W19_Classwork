@@ -36,8 +36,8 @@ seq4pdb <- read.fasta("data/Sequence_for_PDB_search.txt")
 pdbhits <- blast.pdb(seq4pdb)
 ```
 
-    ##  Searching ... please wait (updates every 5 seconds) RID = 8H14E4W101R 
-    ##  .
+    ##  Searching ... please wait (updates every 5 seconds) RID = 8H6SJDAN014 
+    ##  ..
     ##  Reporting 100 hits
 
 Add annotation to the pdbhits result
