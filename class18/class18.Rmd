@@ -1,0 +1,21 @@
+---
+title: "Lecture 18 Cancer Genomics"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##
+
+```{r}
+library(bio3d)
+```
+
+```{r}
+seqs <- read.fasta("lecture18_sequences.fa")
+aln <- seqaln(seqs)
+#conserv(aln)
+```
+
