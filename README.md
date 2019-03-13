@@ -15,5 +15,5 @@ This is a collection of my work from [BGGN213 at UCSD](https://bioboot.github.io
 - Class 13 [Genome informatics and high throughput sequencing](https://github.com/TDT53/BGGN213_W19_Classwork/blob/master/class13/class13.md)
 - Class 14 [Transcriptomics and analysis of RNA-Seq data](https://github.com/TDT53/BGGN213_W19_Classwork/blob/master/class14/class14.md)
 - Class 15 [Genome annotation and the interpretation of gene lists](https://github.com/TDT53/BGGN213_W19_Classwork/blob/master/class15/class15.md)
-- Class 16 [Biological network analysis]
-- Class 18 [Cancer genomics]
+- Class 16 [Biological network analysis]()
+- Class 18 [Cancer genomics]()
