@@ -1,0 +1,11 @@
+---
+title: "Lecture 17 Network Analysis"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 
+For a data frame, if extracting data from it with **dataframe[1,]** or **dataframe[,1]**, it will result in a vector, not a data frame, therefore may result in some error downstream of the coding. In this case, if we want to retain the dimensionality of the data, can use **dataframe[,1, drop = FALSE]**

@@ -1,0 +1,146 @@
+---
+title: "Lecture 15 Gene set enrichment analysis"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Differential Gene Expression Analysis revisited
+```{r message=FALSE}
+library(DESeq2)
+```
+
+```{r}
+metafile <- "data/GSE37704_metadata.csv"
+countfile <- "data/GSE37704_featurecounts.csv"
+```
+
+```{r}
+col.data <- read.csv(metafile, row.names = 1)
+count.data <- read.csv(countfile, row.names = 1)
+head(col.data)
+head(count.data)
+```
+
+Remove the **length** col from the count.data
+
+```{r}
+count.data <- as.matrix(count.data[, 2:ncol(count.data)])
+```
+
+```{r}
+all(row.names(col.data) == colnames(count.data))
+head(count.data)
+```
+
+Remove all the genes with all zero values
+```{r}
+count.data <- count.data[rowSums(count.data) != 0, ]
+```
+
+## Running DESeq2
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData=count.data,
+                             colData=col.data,
+                             design=~condition)
+dds = DESeq(dds)
+```
+
+```{r}
+res <- results(dds)
+head(res)
+```
+
+Make a volcano plot
+```{r}
+mycols <- rep("gray", nrow(res))
+mycols[abs(res$log2FoldChange) > 2] <- "red"
+mycols[res$padj < 0.01 & abs(res$log2FoldChange) > 2] <- "blue"
+plot(x = res$log2FoldChange, y = -log(res$padj), col = mycols, xlab = "Log2 Fold Change", ylab = "-Log(P value)")
+```
+
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+
+columns(org.Hs.eg.db)
+
+res$symbol = mapIds(org.Hs.eg.db,
+                    keys=row.names(res), 
+                    keytype="ENSEMBL",
+                    column="SYMBOL",
+                    multiVals="first")
+
+res$entrez = mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column="ENTREZID",
+                    multiVals="first")
+
+res$name =   mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column= "GENENAME",
+                    multiVals="first")
+
+```
+
+```{r}
+res <- res[order(res$pvalue),]
+write.csv(res, file = "deseq_results.csv")
+```
+
+## Pathway analysis
+```{r}
+library(pathview)
+library(gage)
+library(gageData)
+```
+
+```{r}
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs <- kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+
+```{r}
+foldchanges <- res$log2FoldChange
+names(foldchanges) <- res$entrez
+head(foldchanges)
+```
+
+```{r}
+# Get the results
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+```
+
+```{r}
+head(keggres$less)
+```
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+
+![](hsa04110.pathview.png)
+
+```{r}
+data(go.sets.hs)
+data(go.subs.hs)
+
+# Focus on Biological Process subset of GO
+gobpsets = go.sets.hs[go.subs.hs$BP]
+
+gobpres = gage(foldchanges, gsets=gobpsets, same.dir=TRUE)
+
+lapply(gobpres, head)
+```
+
